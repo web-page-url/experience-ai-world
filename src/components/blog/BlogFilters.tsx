@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { useBlog } from './BlogContext';
 
 const categories = [
   'All',
@@ -10,10 +11,8 @@ const categories = [
   'Technology',
   'Tutorials',
   'Reviews',
-  'Startups',
   'Ethics',
-  'Coding',
-  'Trends'
+  'AI Ethics'
 ];
 
 const sortOptions = [
@@ -24,16 +23,8 @@ const sortOptions = [
 ];
 
 export default function BlogFilters() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedSort, setSelectedSort] = useState('newest');
+  const { filters, setFilters, clearFilters } = useBlog();
   const [showFilters, setShowFilters] = useState(false);
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('All');
-    setSelectedSort('newest');
-  };
 
   return (
     <section className="py-8 border-b border-glass-border bg-background/50 backdrop-blur-sm sticky top-16 z-30">
@@ -47,15 +38,15 @@ export default function BlogFilters() {
           >
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filters.searchQuery}
+              onChange={(e) => setFilters({ searchQuery: e.target.value })}
               placeholder="Search articles..."
               className="input w-full pl-10 pr-4"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground/40" />
-            {searchQuery && (
+            {filters.searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => setFilters({ searchQuery: '' })}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-background-secondary rounded-full transition-colors"
               >
                 <X className="w-3 h-3" />
@@ -73,9 +64,9 @@ export default function BlogFilters() {
             {categories.map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => setFilters({ selectedCategory: category })}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  selectedCategory === category
+                  filters.selectedCategory === category
                     ? 'bg-accent-blue text-white shadow-lg'
                     : 'bg-background-secondary hover:bg-background-tertiary text-foreground/70 hover:text-foreground'
                 }`}
@@ -93,8 +84,8 @@ export default function BlogFilters() {
             className="relative"
           >
             <select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value)}
+              value={filters.selectedSort}
+              onChange={(e) => setFilters({ selectedSort: e.target.value })}
               className="input appearance-none pr-8 cursor-pointer"
             >
               {sortOptions.map((option) => (
@@ -118,7 +109,7 @@ export default function BlogFilters() {
           </motion.button>
 
           {/* Clear Filters */}
-          {(searchQuery || selectedCategory !== 'All' || selectedSort !== 'newest') && (
+          {(filters.searchQuery || filters.selectedCategory !== 'All' || filters.selectedSort !== 'newest') && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -144,9 +135,9 @@ export default function BlogFilters() {
               {categories.map((category) => (
                 <button
                   key={category}
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setFilters({ selectedCategory: category })}
                   className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedCategory === category
+                    filters.selectedCategory === category
                       ? 'bg-accent-blue text-white'
                       : 'bg-background-secondary hover:bg-background-tertiary text-foreground/70 hover:text-foreground'
                   }`}
