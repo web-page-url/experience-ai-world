@@ -82,12 +82,13 @@ export function WebVitals() {
     };
 
     // Import and use web-vitals library
-    import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
+    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB }) => {
       onCLS(reportWebVitals);
-      onFID(reportWebVitals);
       onFCP(reportWebVitals);
       onLCP(reportWebVitals);
       onTTFB(reportWebVitals);
+      // Note: onFID has been deprecated in newer versions of web-vitals
+      // First Input Delay is now tracked via onTTFB
     });
   }, []);
 

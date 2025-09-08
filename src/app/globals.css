@@ -493,6 +493,23 @@ h6 { font-size: 1.125rem; }
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: neon-pulse 3s ease-in-out infinite;
+    /* Fallback for better contrast in light mode */
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Ensure cyber-text has good contrast in light mode */
+  :root .cyber-text {
+    color: var(--accent-blue) !important;
+    -webkit-text-fill-color: var(--accent-blue) !important;
+    text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  }
+
+  /* Dark mode keeps the gradient effect */
+  .dark .cyber-text {
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    text-shadow: none;
   }
 
   .cyber-border {
