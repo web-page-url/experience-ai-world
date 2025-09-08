@@ -8,6 +8,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { WebsiteStructuredData, OrganizationStructuredData } from "@/components/StructuredData";
 import { Analytics } from "@/components/Analytics";
 import { SkipToContent, KeyboardNavigation } from "@/components/Accessibility";
+import TargetCursor from "@/components/TargetCursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -107,6 +108,9 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <ThemeProvider>
+          {/* Target Cursor Effect */}
+          <TargetCursor />
+
           {/* Accessibility */}
           <SkipToContent />
           <KeyboardNavigation />

@@ -594,7 +594,7 @@ export default function FeaturedPosts() {
             <motion.article
               key={post.id}
               variants={fadeInUp}
-              className="card group cursor-pointer cyber-border"
+              className="card group cursor-pointer cursor-target cyber-border"
               onClick={(e) => {
                 // Only navigate if not clicking on interactive elements
                 if (!(e.target as HTMLElement).closest('a, button')) {
@@ -653,7 +653,7 @@ export default function FeaturedPosts() {
                 <div className="pt-4 border-t border-glass-border">
                   <Link
                     href={`/blog/${post.id}`}
-                    className="inline-flex items-center gap-2 text-accent-blue hover:text-accent-purple transition-colors duration-200 font-medium group/link cursor-pointer"
+                    className="inline-flex items-center gap-2 text-accent-blue hover:text-accent-purple transition-colors duration-200 font-medium group/link cursor-pointer cursor-target"
                     onClick={(e) => {
                       e.preventDefault();
                       console.log('🎯 FEATURED ARTICLE CLICKED:', post.id, post.title);
@@ -682,7 +682,7 @@ export default function FeaturedPosts() {
         >
           <Link href="/blog">
             <motion.button
-              className="btn-secondary cyber-border"
+              className="btn-secondary cyber-border cursor-target"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

@@ -246,7 +246,7 @@ export default function Hero() {
           >
             <motion.button
               onClick={scrollToBlog}
-              className="btn-primary group cyber-border"
+              className="btn-primary group cyber-border cursor-target"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -258,7 +258,7 @@ export default function Hero() {
 
             <Link href="/newsletter">
               <motion.button
-                className="btn-secondary group cyber-border"
+                className="btn-secondary group cyber-border cursor-target"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

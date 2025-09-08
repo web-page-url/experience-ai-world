@@ -38,7 +38,7 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
+          <Link href="/" className="flex items-center space-x-2 group cursor-target">
             <motion.div
               className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center cyber-border"
               whileHover={{ scale: 1.05 }}
@@ -59,7 +59,7 @@ export default function Navigation() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-foreground hover:text-accent-blue transition-all duration-200 flex items-center space-x-2 group relative"
+                className="text-foreground hover:text-accent-blue transition-all duration-200 flex items-center space-x-2 group relative cursor-target"
               >
                 <item.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span>{item.name}</span>
@@ -72,7 +72,7 @@ export default function Navigation() {
             {/* Search Button */}
             <motion.button
               onClick={toggleSearch}
-              className="p-2 rounded-lg hover:bg-background-secondary transition-colors"
+              className="p-2 rounded-lg hover:bg-background-secondary transition-colors cursor-target"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Search"
@@ -83,7 +83,7 @@ export default function Navigation() {
             {/* Theme Toggle */}
             <motion.button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-background-secondary transition-colors"
+              className="p-2 rounded-lg hover:bg-background-secondary transition-colors cursor-target"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle theme"
@@ -98,7 +98,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <motion.button
               onClick={toggleMenu}
-              className="md:hidden p-2 rounded-lg hover:bg-background-secondary transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-background-secondary transition-colors cursor-target"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle menu"
@@ -150,7 +150,7 @@ export default function Navigation() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center space-x-3 text-foreground hover:text-accent-blue transition-colors duration-200 p-2 rounded-lg hover:bg-background-tertiary"
+                    className="flex items-center space-x-3 text-foreground hover:text-accent-blue transition-colors duration-200 p-2 rounded-lg hover:bg-background-tertiary cursor-target"
                     onClick={() => setIsOpen(false)}
                   >
                     <item.icon className="w-5 h-5" />
@@ -174,7 +174,7 @@ export default function Navigation() {
                       placeholder="Your email"
                       className="input flex-1"
                     />
-                    <button className="btn-primary px-6 py-2 text-sm">
+                    <button className="btn-primary px-6 py-2 text-sm cursor-target">
                       Subscribe
                     </button>
                   </div>

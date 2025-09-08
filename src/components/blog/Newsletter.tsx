@@ -134,7 +134,7 @@ export default function Newsletter() {
                 <motion.button
                   type="submit"
                   disabled={isLoading || !email.trim()}
-                  className="btn-primary w-full group disabled:opacity-50 disabled:cursor-not-allowed cyber-border"
+                  className="btn-primary w-full group disabled:opacity-50 disabled:cursor-not-allowed cyber-border cursor-target"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
