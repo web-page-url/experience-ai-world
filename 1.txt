@@ -4,3 +4,6 @@ Make It Visually Appealing ANd eyer catching
 I will givce you images also To display as cards
 Mention Their Qualificatiobns as well in the Cards
 Add this as a component
+
+
+Remove manifest.json file and update styles for better contrast in light mode.*Adjust web-vitals import to reflect deprecation of onFID.

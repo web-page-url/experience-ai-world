@@ -16,21 +16,21 @@
   --animate-neon-pulse: neon-pulse 1.5s ease-in-out infinite;
 }
 
-/* Light Theme Colors */
+/* Light Theme Colors - Warm Orangish Tint */
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
-  --background-secondary: #f9fafb;
-  --background-tertiary: #f3f4f6;
+  --background: #fef7f0; /* Warm cream/orangish white */
+  --foreground: #1f2937; /* Darker for better contrast */
+  --background-secondary: #fdf4ed; /* Light orangish */
+  --background-tertiary: #fed7aa; /* Warm orange tint */
 
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-pink: #ec4899;
-  --accent-cyan: #06b6d4;
+  --accent-blue: #ea580c; /* Warm orange instead of blue */
+  --accent-purple: #c2410c; /* Darker orange */
+  --accent-pink: #dc2626; /* Reddish orange */
+  --accent-cyan: #ea580c; /* Orange */
 
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-shadow: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(254, 247, 240, 0.9); /* Orangish glass */
+  --glass-border: rgba(234, 88, 12, 0.2);
+  --glass-shadow: rgba(234, 88, 12, 0.1);
 
   --font-primary: var(--font-inter);
   --font-heading: var(--font-sora);

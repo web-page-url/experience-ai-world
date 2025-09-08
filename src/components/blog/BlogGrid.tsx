@@ -9,7 +9,7 @@ import { useState } from 'react';
 // Mock blog posts data
 const blogPosts = [
   {
-    id: 1,
+    id: '1',
     title: "The Future of AI: From ChatGPT to AGI",
     excerpt: "Explore how artificial intelligence is evolving from conversational models to artificial general intelligence, and what it means for humanity.",
     content: `
@@ -101,7 +101,7 @@ The journey from ChatGPT to AGI is not just a technological evolution; it's a fu
     featured: true,
   },
   {
-    id: 2,
+    id: '2',
     title: "Building Your First Machine Learning Model",
     excerpt: "A comprehensive guide for beginners to create, train, and deploy their first ML model using Python and TensorFlow.",
     content: `
@@ -279,7 +279,7 @@ Happy learning! 🚀
     featured: false,
   },
   {
-    id: 3,
+    id: '3',
     title: "AI Ethics: Navigating the Moral Landscape",
     excerpt: "Understanding the ethical implications of artificial intelligence development and deployment in modern society.",
     coverImage: "/api/placeholder/600/400",
@@ -292,7 +292,7 @@ Happy learning! 🚀
     featured: false,
   },
   {
-    id: 4,
+    id: '4',
     title: "Claude vs GPT-5: The Ultimate AI Showdown",
     excerpt: "An in-depth comparison of Anthropic's Claude and OpenAI's latest GPT model across various use cases and performance metrics.",
     coverImage: "/api/placeholder/600/400",
@@ -305,7 +305,7 @@ Happy learning! 🚀
     featured: true,
   },
   {
-    id: 5,
+    id: '5',
     title: "OpenAI's GPT-5 Architecture Deep Dive",
     excerpt: "Analyzing the technical architecture behind OpenAI's latest language model and its implications for AI development.",
     coverImage: "/api/placeholder/600/400",
@@ -387,13 +387,13 @@ const staggerChildren = {
 
 export default function BlogGrid() {
   const [visiblePosts, setVisiblePosts] = useState(9);
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
 
   const handleLoadMore = () => {
     setVisiblePosts(prev => prev + 6);
   };
 
-  const handleLike = (postId: number) => {
+  const handleLike = (postId: string) => {
     setLikedPosts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(postId)) {
@@ -422,6 +422,13 @@ export default function BlogGrid() {
               key={post.id}
               variants={fadeInUp}
               className="card group cursor-pointer overflow-hidden cyber-border"
+              onClick={(e) => {
+                // Only navigate if not clicking on interactive elements
+                if (!(e.target as HTMLElement).closest('a, button')) {
+                  console.log('🎯 CARD CLICKED:', post.id, post.title);
+                  window.location.href = `/blog/${post.id}`;
+                }
+              }}
             >
               {/* Cover Image */}
               <div className="relative h-48 mb-4 overflow-hidden rounded-xl">
@@ -458,8 +465,20 @@ export default function BlogGrid() {
 
               {/* Content */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold group-hover:text-accent-blue transition-colors duration-200 line-clamp-2">
-                  <Link href={`/blog/${post.id}`}>
+                <h3 className="text-lg font-bold group-hover:text-accent-blue transition-colors duration-200 line-clamp-2 cursor-pointer">
+                  <Link
+                    href={`/blog/${post.id}`}
+                    className="block w-full h-full"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('🎯 CLICKED ARTICLE:', post.id, post.title);
+                      console.log('🔗 NAVIGATING TO:', `/blog/${post.id}`);
+                      // Force navigation with multiple methods
+                      setTimeout(() => {
+                        window.location.href = `/blog/${post.id}`;
+                      }, 100);
+                    }}
+                  >
                     {post.title}
                   </Link>
                 </h3>
@@ -520,7 +539,15 @@ export default function BlogGrid() {
                 {/* Read More Link */}
                 <Link
                   href={`/blog/${post.id}`}
-                  className="inline-flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200 text-sm font-medium group/link"
+                  className="inline-flex items-center gap-1 text-accent-blue hover:text-accent-purple transition-colors duration-200 text-sm font-medium group/link cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('🎯 READ MORE CLICKED:', post.id, post.title);
+                    console.log('🔗 NAVIGATING TO:', `/blog/${post.id}`);
+                    setTimeout(() => {
+                      window.location.href = `/blog/${post.id}`;
+                    }, 100);
+                  }}
                 >
                   Read More
                   <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />

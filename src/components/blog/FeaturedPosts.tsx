@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 const featuredPosts = [
   {
-    id: 1,
+    id: '1',
     title: "The Future of AI: From ChatGPT to AGI",
     excerpt: "Explore how artificial intelligence is evolving from conversational models to artificial general intelligence, and what it means for humanity.",
     content: `
@@ -99,7 +99,7 @@ The journey from ChatGPT to AGI is not just a technological evolution; it's a fu
     featured: true,
   },
   {
-    id: 2,
+    id: '2',
     title: "Building Your First Machine Learning Model",
     excerpt: "A comprehensive guide for beginners to create, train, and deploy their first ML model using Python and TensorFlow.",
     content: `
@@ -277,7 +277,7 @@ Happy learning! 🚀
     featured: true,
   },
   {
-    id: 3,
+    id: '3',
     title: "AI Ethics: Navigating the Moral Landscape",
     excerpt: "Understanding the ethical implications of artificial intelligence development and deployment in modern society.",
     content: `
@@ -368,7 +368,7 @@ The goal is not to slow down AI progress, but to ensure that progress serves hum
     featured: true,
   },
   {
-    id: 4,
+    id: '4',
     title: "Claude vs GPT-5: The Ultimate AI Showdown",
     excerpt: "An in-depth comparison of Anthropic's Claude and OpenAI's latest GPT model across various use cases and performance metrics.",
     content: `
@@ -595,6 +595,13 @@ export default function FeaturedPosts() {
               key={post.id}
               variants={fadeInUp}
               className="card group cursor-pointer cyber-border"
+              onClick={(e) => {
+                // Only navigate if not clicking on interactive elements
+                if (!(e.target as HTMLElement).closest('a, button')) {
+                  console.log('🎯 FEATURED CARD CLICKED:', post.id, post.title);
+                  window.location.href = `/blog/${post.id}`;
+                }
+              }}
             >
               {/* Cover Image */}
               <div className="relative h-48 mb-6 overflow-hidden rounded-xl">
@@ -646,7 +653,15 @@ export default function FeaturedPosts() {
                 <div className="pt-4 border-t border-glass-border">
                   <Link
                     href={`/blog/${post.id}`}
-                    className="inline-flex items-center gap-2 text-accent-blue hover:text-accent-purple transition-colors duration-200 font-medium group/link"
+                    className="inline-flex items-center gap-2 text-accent-blue hover:text-accent-purple transition-colors duration-200 font-medium group/link cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('🎯 FEATURED ARTICLE CLICKED:', post.id, post.title);
+                      console.log('🔗 NAVIGATING TO:', `/blog/${post.id}`);
+                      setTimeout(() => {
+                        window.location.href = `/blog/${post.id}`;
+                      }, 100);
+                    }}
                   >
                     Read More
                     <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />

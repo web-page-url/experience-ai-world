@@ -8,7 +8,24 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['api.placeholder', 'images.unsplash.com', 'picsum.photos'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.placeholder',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
 };

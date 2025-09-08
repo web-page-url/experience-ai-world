@@ -5,6 +5,10 @@ import { Clock, User, Calendar, Heart, MessageSquare, Share2, Twitter, Linkedin,
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface BlogPostProps {
   post: {
@@ -156,15 +160,95 @@ export default function BlogPost({ post }: BlogPostProps) {
       </motion.section>
 
       {/* Content */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="prose prose-lg max-w-none"
+          className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-accent-blue prose-a:text-accent-blue hover:prose-a:text-accent-purple prose-blockquote:border-accent-blue prose-blockquote:text-foreground/80"
         >
-          {/* For now, we'll render the HTML content. In a real implementation, this would be MDX content */}
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ className, children, ...props }) {
+                const match = /language-(\w+)/.exec(className || '');
+                const isInline = !match || !String(children).includes('\n');
+
+                return !isInline ? (
+                  <SyntaxHighlighter
+                    style={oneDark}
+                    language={match ? match[1] : 'text'}
+                    PreTag="div"
+                    className="rounded-lg my-4"
+                    {...props}
+                  >
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
+                ) : (
+                  <code className="bg-background-secondary px-1 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                );
+              },
+              pre({ children, ...props }) {
+                return (
+                  <pre className="bg-background-secondary p-4 rounded-lg overflow-x-auto my-4" {...props}>
+                    {children}
+                  </pre>
+                );
+              },
+              h1({ children, ...props }) {
+                return (
+                  <h1 className="text-3xl font-bold mb-6 text-foreground border-b border-glass-border pb-2" {...props}>
+                    {children}
+                  </h1>
+                );
+              },
+              h2({ children, ...props }) {
+                return (
+                  <h2 className="text-2xl font-bold mb-4 mt-8 text-foreground" {...props}>
+                    {children}
+                  </h2>
+                );
+              },
+              h3({ children, ...props }) {
+                return (
+                  <h3 className="text-xl font-semibold mb-3 mt-6 text-foreground" {...props}>
+                    {children}
+                  </h3>
+                );
+              },
+              blockquote({ children, ...props }) {
+                return (
+                  <blockquote className="border-l-4 border-accent-blue pl-4 italic text-foreground/80 my-4" {...props}>
+                    {children}
+                  </blockquote>
+                );
+              },
+              p({ children, ...props }) {
+                return (
+                  <p className="mb-4 text-foreground/90 leading-relaxed" {...props}>
+                    {children}
+                  </p>
+                );
+              },
+              a({ children, href, ...props }) {
+                return (
+                  <a
+                    href={href}
+                    className="text-accent-blue hover:text-accent-purple underline decoration-2 underline-offset-2 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                );
+              }
+            }}
+          >
+            {post.content || 'No content available'}
+          </ReactMarkdown>
         </motion.div>
 
         {/* Author Bio */}
