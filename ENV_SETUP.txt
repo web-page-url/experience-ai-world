@@ -1,0 +1,26 @@
+# Study Sparks Environment Variables Setup
+
+Create a file named `.env.local` in your project root directory with the following content:
+
+```
+# Study Sparks Environment Variables
+# Get your Gemini API key from: https://makersuite.google.com/app/apikey
+
+# Required for AI Chatbot
+NEXT_PUBLIC_GEMINI_API_KEY=your_actual_gemini_api_key_here
+
+# Optional: For existing AI comparison feature
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+```
+
+## Important Notes:
+- The `NEXT_PUBLIC_` prefix is required for client-side access in Next.js
+- Replace `your_actual_gemini_api_key_here` with your real Gemini API key
+- Restart your development server after creating this file
+- Never commit `.env.local` to version control (it's already in .gitignore)
+
+## Testing:
+1. After setup, restart: `npm run dev`
+2. Visit: http://localhost:3000
+3. Click the chat bubble (bottom-right)
+4. Chatbot should now respond with AI-powered answers!

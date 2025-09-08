@@ -1,0 +1,37 @@
+# Robots.txt for Experience AI World
+# https://experience-ai-world.vercel.app/
+
+User-agent: *
+Allow: /
+
+# Allow all major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Disallow admin areas and private content
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/private/
+Disallow: /_next/
+Disallow: /.next/
+
+# Allow access to sitemap
+Allow: /sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

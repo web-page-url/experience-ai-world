@@ -1,0 +1,6 @@
+Add A section --> Meet Our Teachers
+Make It Visually Appealing ANd eyer catching
+
+I will givce you images also To display as cards
+Mention Their Qualificatiobns as well in the Cards
+Add this as a component
