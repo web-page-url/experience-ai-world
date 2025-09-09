@@ -153,7 +153,7 @@ User query: "${message}"
 
 ${relevantArticles.length > 0 ?
   `Most relevant articles based on the query:\n${relevantArticles.map(item =>
-    `- ${item.post.title} (Relevance: ${item.relevance.toFixed(1)}): ${item.post.excerpt}`
+    `- **[${item.post.title}](http://localhost:3000${item.post.url})**: ${item.post.excerpt}`
   ).join('\n')}` :
   'No highly relevant articles found for this query.'
 }
@@ -165,7 +165,11 @@ Instructions:
 - If no relevant articles are found, suggest browsing the blog or ask for clarification
 - Keep responses concise but informative
 - Use emojis to make responses more engaging
-- If suggesting articles, provide direct links in the format: [Article Title](/blog/article-id)
+- When suggesting articles, ALWAYS use the FULL URLs provided in the context (e.g., http://localhost:3000/blog/1, http://localhost:3000/blog/2, etc.)
+- Format article suggestions as: **[Article Title](http://localhost:3000/blog/actual-id)**: Brief description
+- Use **bold formatting** for article titles
+- Do NOT generate placeholder URLs or relative paths - use the complete full URLs from the context
+- Always include the full domain and protocol in article links
 - Encourage users to explore more content
 - End responses with a question to continue the conversation
 `;
@@ -176,14 +180,42 @@ Instructions:
     const response = result.response;
     const aiResponse = response.text();
 
-    // Add article links to the response
+    // Add article links to the response and fix any placeholder URLs
     let enhancedResponse = aiResponse;
+
+    // First, replace any placeholder URLs with full URLs and ensure bold formatting
+    enhancedResponse = enhancedResponse.replace(/\[([^\]]+)\]\(\/blog\/article-id-(\d+)\)/g, (match, title, id) => {
+      const actualPost = blogPosts.find(p => p.id === id);
+      if (actualPost) {
+        return `**[${title}](http://localhost:3000${actualPost.url})**`;
+      }
+      return match;
+    });
+
+    // Replace relative URLs with full URLs and ensure bold formatting
+    enhancedResponse = enhancedResponse.replace(/\[([^\]]+)\]\(\/blog\/([^)]*)\)/g, (match, title, path) => {
+      return `**[${title}](http://localhost:3000/blog/${path})**`;
+    });
+
+    // Replace any remaining relative paths with full URLs and ensure bold formatting
+    enhancedResponse = enhancedResponse.replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, (match, title, path) => {
+      if (path.startsWith('/blog/')) {
+        return `**[${title}](http://localhost:3000${path})**`;
+      }
+      return match;
+    });
+
+    // Finally, ensure all article titles have proper bold full URL links
     relevantArticles.forEach(item => {
-      const linkText = `[${item.post.title}](${item.post.url})`;
-      enhancedResponse = enhancedResponse.replace(
-        new RegExp(item.post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-        linkText
-      );
+      const fullUrl = `http://localhost:3000${item.post.url}`;
+      const linkText = `**[${item.post.title}](${fullUrl})**`;
+      // Only replace if not already linked with full URL
+      if (!enhancedResponse.includes(`](${fullUrl})`)) {
+        enhancedResponse = enhancedResponse.replace(
+          new RegExp(item.post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+          linkText
+        );
+      }
     });
 
     return NextResponse.json({
@@ -194,6 +226,7 @@ Instructions:
         excerpt: item.post.excerpt,
         category: item.post.category,
         url: item.post.url,
+        fullUrl: `http://localhost:3000${item.post.url}`,
         relevance: item.relevance
       }))
     });

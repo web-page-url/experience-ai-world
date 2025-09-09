@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: string;
@@ -194,10 +196,58 @@ export default function Chatbot() {
                         : 'bg-slate-800/80 text-gray-100 border border-orange-500/20'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
-                      {message.content}
-                    </p>
-                    <span className="text-xs opacity-60 mt-1 block">
+                    <div className="text-sm leading-relaxed break-words overflow-wrap-anywhere prose prose-sm max-w-none prose-invert">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          a: ({ href, children, ...props }) => (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`${
+                                message.type === 'user'
+                                  ? 'text-white underline hover:text-orange-100'
+                                  : 'text-orange-400 underline hover:text-orange-300'
+                              } transition-colors`}
+                              {...props}
+                            >
+                              {children}
+                            </a>
+                          ),
+                          strong: ({ children, ...props }) => (
+                            <strong
+                              className={`${
+                                message.type === 'user'
+                                  ? 'font-bold text-white'
+                                  : 'font-bold text-orange-300'
+                              }`}
+                              {...props}
+                            >
+                              {children}
+                            </strong>
+                          ),
+                          p: ({ children, ...props }) => (
+                            <p className="mb-2 last:mb-0" {...props}>
+                              {children}
+                            </p>
+                          ),
+                          ul: ({ children, ...props }) => (
+                            <ul className="list-disc list-inside mb-2 space-y-1" {...props}>
+                              {children}
+                            </ul>
+                          ),
+                          li: ({ children, ...props }) => (
+                            <li className="text-sm" {...props}>
+                              {children}
+                            </li>
+                          ),
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                    <span className="text-xs opacity-60 mt-2 block">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
