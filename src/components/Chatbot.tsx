@@ -2,28 +2,31 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, X, Bot, User, Loader2, Minimize2 } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 
 interface Message {
   id: string;
-  text: string;
-  sender: 'user' | 'bot';
+  type: 'user' | 'bot';
+  content: string;
   timestamp: Date;
 }
 
-interface ChatbotProps {
-  isDark?: boolean;
+interface RelevantArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  url: string;
+  relevance: number;
 }
 
-export default function Chatbot({ isDark = false }: ChatbotProps) {
+export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! 👋 I\'m StudyBot, your AI assistant for Study Sparks. How can I help you today?',
-      sender: 'bot',
+      type: 'bot',
+      content: "🤖 Hi! I'm Anubhav's AI Assistant! I'm here to help you discover amazing articles on our AI blog. What topics interest you? You can ask about AI, machine learning, robotics, quantum computing, or any other tech topic! 🚀",
       timestamp: new Date()
     }
   ]);
@@ -46,47 +49,13 @@ export default function Chatbot({ isDark = false }: ChatbotProps) {
     }
   }, [isOpen]);
 
-  const callGeminiAPI = async (prompt: string): Promise<string> => {
-    // Use the GEMINI_API_KEY from environment variables
-    const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-    if (!GEMINI_API_KEY) {
-      return 'Sorry, the AI assistant is not configured yet. Please add your GEMINI_API_KEY to the .env.local file as NEXT_PUBLIC_GEMINI_API_KEY.';
-    }
-
-    try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      const systemPrompt = `You are StudyBot, an AI assistant for Study Sparks, an educational platform teaching Coding, Math, Science, English, and AI to kids.
-
-Requirements:
-- Be friendly, helpful, and encouraging
-- Keep responses concise but informative
-- Focus on educational topics and platform features
-- Only return the response text without any explanations or formatting
-- Maintain a supportive tone suitable for students and parents
-
-User query: ${prompt}`;
-
-      const result = await model.generateContent(systemPrompt);
-      const response = result.response;
-      const botResponse = response.text();
-
-      return botResponse.trim();
-    } catch (error) {
-      console.error('Gemini API error:', error);
-      return 'Sorry, I\'m having trouble connecting right now. Please try again later or contact our support team.';
-    }
-  };
-
-  const handleSendMessage = async () => {
+  const sendMessage = async () => {
     if (!inputMessage.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user',
+      type: 'user',
+      content: inputMessage,
       timestamp: new Date()
     };
 
@@ -95,21 +64,38 @@ User query: ${prompt}`;
     setIsTyping(true);
 
     try {
-      const botResponse = await callGeminiAPI(inputMessage);
+      const response = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: inputMessage }),
+      });
 
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botResponse,
-        sender: 'bot',
-        timestamp: new Date()
-      };
+      const data = await response.json();
 
-      setMessages(prev => [...prev, botMessage]);
+      if (response.ok) {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'bot',
+          content: data.response,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'bot',
+          content: data.fallbackResponse || "🤖 Sorry, I'm having trouble connecting right now. Please try again later!",
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Sorry, I\'m having trouble responding right now. Please try again later.',
-        sender: 'bot',
+        type: 'bot',
+        content: "🤖 Oops! Something went wrong. Please try again later!",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -121,250 +107,137 @@ User query: ${prompt}`;
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      sendMessage();
     }
   };
 
   return (
     <>
-      {/* Chat Button */}
-      <motion.div
-        className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-2"
+      {/* Chatbot Toggle Button */}
+      <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        exit={{ scale: 0 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-24 right-6 z-50 bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-500/30 hover:border-orange-400/50"
+        aria-label="Open AI Chat Assistant"
       >
-        {/* Close Arrow */}
-        <motion.button
-          className={`w-8 h-8 rounded-full shadow-lg backdrop-blur-md border transition-all duration-300 ${
-            isDark
-              ? 'bg-gray-800/90 border-gray-700/50 text-white hover:bg-gray-700'
-              : 'bg-white/90 border-gray-300/50 text-gray-700 hover:bg-gray-50'
-          }`}
-          onClick={() => setIsOpen(false)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          animate={{
-            rotate: isOpen ? 180 : 0,
-          }}
-          transition={{ duration: 0.3 }}
-          aria-label="Close StudyBot chat"
-        >
-          <X className="w-4 h-4 mx-auto" aria-hidden="true" />
-        </motion.button>
-
-        {/* Main Chat Button */}
-        <motion.button
-          className={`w-16 h-16 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 border-2 border-white/30 relative overflow-hidden group ${
-            isOpen ? 'scale-0' : 'scale-100'
-          }`}
-          onClick={() => {
-            setIsOpen(true);
-            setIsMinimized(false); // Reset minimized state when opening
-          }}
-          aria-label="Open StudyBot chat assistant"
-          whileHover={{
-            scale: 1.1,
-            boxShadow: "0 20px 40px rgba(139, 92, 246, 0.6), 0 0 20px rgba(236, 72, 153, 0.4)"
-          }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            y: [0, -12, 0],
-            rotate: [0, 5, -5, 0]
-          }}
-          transition={{
-            y: {
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
-            },
-            rotate: {
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }
-          }}
-        >
-        {/* Animated background glow */}
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-purple-400 to-violet-400 opacity-0 group-hover:opacity-30 rounded-full blur-md transition-opacity duration-300"></div>
-
-        {/* Pulsing ring */}
-        <motion.div
-          className="absolute inset-0 border-2 border-violet-300 rounded-full"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 0, 0.5]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-          <MessageCircle className="w-8 h-8 text-white mx-auto relative z-10" />
-
-          {/* Notification dot */}
-          <motion.div
-            className="absolute -top-1 -right-1 w-4 h-4 bg-pink-400 rounded-full border-2 border-white"
-            animate={{
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <div className="w-2 h-2 bg-pink-300 rounded-full mx-auto mt-0.5"></div>
-          </motion.div>
-        </motion.button>
-      </motion.div>
+        <AnimatePresence mode="wait">
+          {isOpen ? (
+            <motion.div
+              key="close"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <X className="w-6 h-6" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="chat"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MessageCircle className="w-6 h-6" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {/* Chat Window */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            className={`fixed bottom-20 right-6 z-50 bg-gradient-to-br from-white via-violet-50 to-purple-50 backdrop-blur-lg shadow-2xl border border-violet-200/50 overflow-hidden ${
-              isMinimized ? 'w-80 h-16 rounded-2xl' : 'w-80 h-96 flex flex-col rounded-t-2xl'
-            }`}
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0,
-              height: isMinimized ? 64 : 384
-            }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            transition={{ duration: 0.3 }}
+            key="chat-window"
+            initial={{ opacity: 0, y: 100, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 100, scale: 0.8 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-24 right-6 z-40 w-80 sm:w-96 h-[500px] bg-slate-900/95 backdrop-blur-md border border-orange-500/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 p-4 flex items-center justify-between relative overflow-hidden flex-shrink-0">
-              {/* Animated background pattern */}
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-0 left-0 w-16 h-16 bg-white/10 rounded-full -translate-x-8 -translate-y-8"></div>
-                <div className="absolute bottom-0 right-0 w-12 h-12 bg-white/10 rounded-full translate-x-6 translate-y-6"></div>
-              </div>
-
-              <div className="flex items-center gap-3 relative z-10">
-                <motion.div
-                  className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30"
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <Bot className="w-6 h-6 text-white" />
-                </motion.div>
-                <div>
-                  <h3 className="text-white font-bold text-base flex items-center gap-2">
-                    StudyBot
-                    <motion.span
-                      className="w-2 h-2 bg-green-400 rounded-full"
-                      animate={{ opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  </h3>
-                  <p className="text-white/90 text-xs">Your AI Learning Assistant</p>
+            <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-4 border-b border-orange-500/30 flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0 w-full">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center border border-orange-400/30 flex-shrink-0">
+                  <Bot className="w-5 h-5" />
                 </div>
-              </div>
-              <div className="flex items-center gap-2 relative z-10">
-                {/* Minimize Button */}
-                <motion.button
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 border border-white/30"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  animate={{ rotate: isMinimized ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Minimize2 className="w-4 h-4 text-white" />
-                </motion.button>
-
-                {/* Close Button */}
-                <motion.button
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 border border-white/30"
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <X className="w-4 h-4 text-white" />
-                </motion.button>
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <h3 className="font-bold text-base sm:text-lg truncate w-full">Anubhav's AI Assistant</h3>
+                  <p className="text-xs sm:text-sm opacity-90 truncate w-full">Your AI Blog Guide 🤖</p>
+                </div>
               </div>
             </div>
 
             {/* Messages */}
-            <motion.div
-              className={`overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-violet-50/30 to-purple-50/30 ${
-                isMinimized ? 'h-0 opacity-0' : 'flex-1 opacity-100'
-              }`}
-              animate={{
-                opacity: isMinimized ? 0 : 1,
-                height: isMinimized ? 0 : 'auto'
-              }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
+                  {message.type === 'bot' && (
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-orange-400/30">
+                      <Bot className="w-4 h-4 text-orange-400" />
+                    </div>
+                  )}
+
                   <div
-                    className={`max-w-xs px-4 py-3 rounded-2xl text-sm shadow-lg ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white border border-violet-400'
-                        : 'bg-white text-gray-800 border border-gray-200'
+                    className={`max-w-[240px] sm:max-w-[280px] min-w-0 p-3 rounded-2xl break-words ${
+                      message.type === 'user'
+                        ? 'bg-orange-500 text-white shadow-lg'
+                        : 'bg-slate-800/80 text-gray-100 border border-orange-500/20'
                     }`}
                   >
-                    <div className={`flex items-center gap-2 mb-2 ${
-                      message.sender === 'user' ? 'text-white/80' : 'text-gray-600'
-                    }`}>
-                      {message.sender === 'user' ? (
-                        <User className="w-4 h-4" />
-                      ) : (
-                        <Bot className="w-4 h-4" />
-                      )}
-                      <span className="text-xs font-medium">
-                        {message.sender === 'user' ? 'You' : 'StudyBot'}
-                      </span>
-                    </div>
-                    <p className={`leading-relaxed ${
-                      message.sender === 'user' ? 'text-white' : 'text-gray-800'
-                    }`}>{message.text}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                      {message.content}
+                    </p>
+                    <span className="text-xs opacity-60 mt-1 block">
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
                   </div>
+
+                  {message.type === 'user' && (
+                    <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center flex-shrink-0 border border-blue-400/30">
+                      <User className="w-4 h-4 text-blue-400" />
+                    </div>
+                  )}
                 </motion.div>
               ))}
 
               {/* Typing Indicator */}
               {isTyping && (
                 <motion.div
-                  className="flex justify-start"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-3 justify-start"
                 >
-                  <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl shadow-lg">
-                    <div className="flex items-center gap-2">
-                      <Bot className="w-4 h-4 text-violet-500" />
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                      </div>
+                  <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center border border-orange-400/30">
+                    <Bot className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <div className="bg-slate-800/80 p-3 rounded-2xl border border-orange-500/20">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </motion.div>
               )}
 
               <div ref={messagesEndRef} />
-            </motion.div>
+            </div>
 
             {/* Input */}
-            <div
-              className={`p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0 ${
-                isMinimized ? 'hidden' : 'block'
-              }`}
-            >
+            <div className="border-t border-orange-500/30 p-4 flex-shrink-0">
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -372,29 +245,22 @@ User query: ${prompt}`;
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything about learning..."
-                  className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-gray-800 placeholder-gray-500 text-sm shadow-sm"
+                  placeholder="Ask about AI articles..."
+                  className="flex-1 min-w-0 px-4 py-2 bg-slate-800/80 border border-orange-500/30 rounded-full text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400/50"
                   disabled={isTyping}
                 />
                 <motion.button
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isTyping}
-                  className="w-12 h-12 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-200"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={sendMessage}
+                  disabled={!inputMessage.trim() || isTyping}
+                  className="p-2 bg-orange-500 text-white rounded-full hover:bg-orange-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
-                  {isTyping ? (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5 text-white" />
-                  )}
+                  <Send className="w-4 h-4" />
                 </motion.button>
               </div>
-              <p className="text-xs text-gray-500 mt-3 text-center">
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2 h-2 bg-violet-400 rounded-full animate-pulse"></span>
-                  Powered by Gemini AI • Ask about subjects, courses, or platform features
-                </span>
+              <p className="text-xs text-orange-400/70 mt-2 text-center">
+                ✨ Everything created by Anubhav
               </p>
             </div>
           </motion.div>

@@ -9,6 +9,7 @@ import { WebsiteStructuredData, OrganizationStructuredData } from "@/components/
 import { Analytics } from "@/components/Analytics";
 import { SkipToContent, KeyboardNavigation } from "@/components/Accessibility";
 import TargetCursor from "@/components/TargetCursor";
+import Chatbot from "@/components/Chatbot";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -134,6 +135,9 @@ export default function RootLayout({
 
           {/* Analytics */}
           <Analytics />
+
+          {/* AI Chatbot */}
+          <Chatbot />
         </ThemeProvider>
       </body>
     </html>
