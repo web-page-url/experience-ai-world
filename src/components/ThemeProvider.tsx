@@ -24,7 +24,7 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -33,8 +33,8 @@ export default function ThemeProvider({
     if (savedTheme) {
       setTheme(savedTheme);
     } else {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      setTheme(systemTheme);
+      // Default to dark theme if no saved preference
+      setTheme('dark');
     }
   }, []);
 
@@ -44,6 +44,10 @@ export default function ThemeProvider({
       root.classList.remove('light', 'dark');
       root.classList.add(theme);
       localStorage.setItem('theme', theme);
+    } else {
+      // Apply dark theme immediately on mount to prevent flash
+      const root = window.document.documentElement;
+      root.classList.add('dark');
     }
   }, [theme, mounted]);
 
