@@ -33,9 +33,17 @@ interface BlogPostProps {
     likes: number;
     comments: number;
   };
+  recommendedArticles?: Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    tags: string[];
+    relevanceScore?: number;
+  }>;
 }
 
-export default function BlogPost({ post }: BlogPostProps) {
+export default function BlogPost({ post, recommendedArticles = [] }: BlogPostProps) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes);
 
@@ -176,11 +184,10 @@ export default function BlogPost({ post }: BlogPostProps) {
 
                 return !isInline ? (
                   <SyntaxHighlighter
-                    style={oneDark}
+                    style={oneDark as any}
                     language={match ? match[1] : 'text'}
                     PreTag="div"
                     className="rounded-lg my-4"
-                    {...props}
                   >
                     {String(children).replace(/\n$/, '')}
                   </SyntaxHighlighter>
@@ -251,59 +258,12 @@ export default function BlogPost({ post }: BlogPostProps) {
           </ReactMarkdown>
         </motion.div>
 
-        {/* Author Bio */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-16 p-6 bg-background-secondary rounded-2xl border border-glass-border"
-        >
-          <div className="flex items-start gap-4">
-            <Image
-              src={post.author.avatar}
-              alt={post.author.name}
-              width={64}
-              height={64}
-              className="rounded-full"
-            />
-            <div className="flex-1">
-              <h3 className="text-lg font-bold mb-2">About {post.author.name}</h3>
-              <p className="text-foreground/70 mb-4">{post.author.bio}</p>
-              {post.author.social && (
-                <div className="flex gap-3">
-                  {post.author.social.twitter && (
-                    <a
-                      href={`https://twitter.com/${post.author.social.twitter}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-foreground/60 hover:text-blue-400 transition-colors"
-                    >
-                      <Twitter className="w-5 h-5" />
-                    </a>
-                  )}
-                  {post.author.social.linkedin && (
-                    <a
-                      href={`https://linkedin.com/in/${post.author.social.linkedin}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-foreground/60 hover:text-blue-600 transition-colors"
-                    >
-                      <Linkedin className="w-5 h-5" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
         {/* Engagement Section */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="mt-12 p-6 bg-background-secondary rounded-2xl border border-glass-border"
         >
           <div className="flex items-center justify-between mb-6">
@@ -350,20 +310,54 @@ export default function BlogPost({ post }: BlogPostProps) {
             </div>
           </div>
 
-          {/* Related Posts Placeholder */}
-          <div className="border-t border-glass-border pt-6">
-            <h4 className="font-semibold mb-4">Related Articles</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-background rounded-lg border border-glass-border">
-                <h5 className="font-medium mb-2">AI Ethics: Navigating the Moral Landscape</h5>
-                <p className="text-sm text-foreground/60">Understanding the ethical implications of AI development...</p>
+          {/* Recommended Articles */}
+          {recommendedArticles.length > 0 && (
+            <div className="border-t border-glass-border pt-6">
+              <h4 className="font-semibold mb-4 flex items-center gap-2">
+                📚 Recommended Articles
+                <span className="text-xs bg-accent-blue/10 text-accent-blue px-2 py-1 rounded-full">
+                  Created by Anubhav
+                </span>
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {recommendedArticles.map((article) => (
+                  <Link key={article.id} href={`/blog/${article.id}`}>
+                    <div className="p-4 bg-background rounded-lg border border-glass-border hover:border-accent-blue/50 transition-colors cursor-pointer group">
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="text-xs bg-accent-blue/10 text-accent-blue px-2 py-1 rounded-full">
+                          {article.category}
+                        </span>
+                        {article.relevanceScore && article.relevanceScore > 5 && (
+                          <span className="text-xs text-accent-purple">⭐ Top Match</span>
+                        )}
+                      </div>
+                      <h5 className="font-medium mb-2 group-hover:text-accent-blue transition-colors line-clamp-2">
+                        {article.title}
+                      </h5>
+                      <p className="text-sm text-foreground/60 line-clamp-2 mb-3">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {article.tags.slice(0, 2).map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs bg-background-secondary text-foreground/50 px-2 py-0.5 rounded"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <div className="p-4 bg-background rounded-lg border border-glass-border">
-                <h5 className="font-medium mb-2">The Rise of Multimodal AI Models</h5>
-                <p className="text-sm text-foreground/60">Exploring how AI systems are evolving to process multiple types of data...</p>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-foreground/50 italic">
+                  ✨ All articles are created by Anubhav
+                </p>
               </div>
             </div>
-          </div>
+          )}
         </motion.div>
       </section>
     </article>
